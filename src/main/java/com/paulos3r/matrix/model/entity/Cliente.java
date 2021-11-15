@@ -1,12 +1,19 @@
 package com.paulos3r.matrix.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.tomcat.jni.Local;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Cliente {
 
     @Id
@@ -19,6 +26,11 @@ public class Cliente {
     @Column(nullable = false, length = 11)
     private String cpf;
 
-    @Column(name="data_cadastro")
+    @Column(name="data_cadastro", updatable = false)
     private LocalDate dataCadastro;
+
+    @PrePersist
+    public void prePersist(){
+        setDataCadastro(LocalDate.now());
+    }
 }
