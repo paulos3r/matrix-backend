@@ -7,12 +7,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/clientes") //url base que vai ser usada nesse controller
 public class ClienteController {
 
     //utilizando a interface jpa para persistir
     private final ClienteRepository repository;
+
+    @GetMapping("/retorna")
+    public String retorno(){
+        return "Funciona";
+    }
 
     @Autowired
     public ClienteController(ClienteRepository repository) {
@@ -21,7 +28,7 @@ public class ClienteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED) //retorna o codigo de status 100,200,300,400 ou 500
-    public Cliente salvarCliente(@RequestBody Cliente cliente){
+    public Cliente salvarCliente(@RequestBody @Valid Cliente cliente){
         return repository.save(cliente);
     }
 
@@ -29,7 +36,7 @@ public class ClienteController {
     @ResponseStatus(HttpStatus.OK)
     public Cliente buscarClientePorId(@PathVariable Integer id){
         return repository.findById(id)//retorna um opcional
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND)); //se nao encontrar ele retorna nao encontrado
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado")); //se nao encontrar ele retorna nao encontrado
     }
 
     @DeleteMapping("{id}")
@@ -41,12 +48,12 @@ public class ClienteController {
                     repository.delete(cliente);  //passando o cliente para excluir
                     return Void.TYPE;
                 })
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND)); //se caso não encontrar o cliente retorna não encontrado 404
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado")); //se caso não encontrar o cliente retorna não encontrado 404
     }
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void atualizarCiente(@PathVariable Integer id, @RequestBody Cliente clienteAtualizado){
+    public void atualizarCiente(@PathVariable Integer id, @RequestBody @Valid Cliente clienteAtualizado){
         repository.findById(id)
                 .map( cliente -> {
                     cliente.setNome(clienteAtualizado.getNome());
@@ -56,6 +63,6 @@ public class ClienteController {
                     /*clienteAtualizado.setId(cliente.getId());
                     return repository.save(clienteAtualizado);*/
                 })
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 }
